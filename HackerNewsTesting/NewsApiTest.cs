@@ -5,7 +5,7 @@ using System.Net;
 
 namespace HackerNewsTesting
 {
-    public class UnitTest1
+    public class NewsApiTest
     {
         [Fact]
         public async Task GetAllNews_ReturnsHttpResponseMessage()

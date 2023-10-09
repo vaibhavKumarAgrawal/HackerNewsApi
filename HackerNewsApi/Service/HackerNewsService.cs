@@ -16,12 +16,22 @@ namespace HackerNewsApi.Service
     {
         readonly IHackerNewsRepository _repo;
         readonly IMemoryCache _cacheService;
-        public HackerNewsService(IHackerNewsRepository repository, IMemoryCache cacheService) {
+
+        /// <summary>
+        /// create a constructor and inject dependency 
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="cacheService"></param>
+        public HackerNewsService(IHackerNewsRepository repository, IMemoryCache cacheService)
+        {
             _repo = repository;
             _cacheService = cacheService;
         }
+
+
         /// <summary>
-        /// Get all New News base id pass one by one id and get all
+        /// with the help of repository object fetch the all news ids 
+        /// pass the ids one by one to GetNewestStoriesByIdAsync()
         /// </summary>
         /// <returns></returns>
         public async Task<List<NewsStories>> GetNewestStoriesAsync()
@@ -47,28 +57,38 @@ namespace HackerNewsApi.Service
                 return newNews;
             }
         }
+
+
         /// <summary>
-        /// Get news base on Id
+        /// Get news base on Id and store in IMemory
         /// </summary>
         /// <param name="newsId"></param>
         /// <returns></returns>
-
         public async Task<NewsStories> GetNewestStoriesByIdAsync(int newsId)
         {
-            return await _cacheService.GetOrCreateAsync<NewsStories>(newsId,
-                async cacheEntry =>
-                {
-                    NewsStories news = new NewsStories();
+            try
+            {
 
-                    var response = await _repo.GetNewsById(newsId);
-                    if (response.IsSuccessStatusCode)
+                return await _cacheService.GetOrCreateAsync<NewsStories>(newsId,
+                    async cacheEntry =>
                     {
-                        var storyResponse = response.Content.ReadAsStringAsync().Result;
-                        return  JsonConvert.DeserializeObject<NewsStories>(storyResponse);
-                    }
+                        NewsStories news = new NewsStories();
 
-                    return news;
-                });
+                        var response = await _repo.GetNewsById(newsId);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var storyResponse = response.Content.ReadAsStringAsync().Result;
+                            return JsonConvert.DeserializeObject<NewsStories>(storyResponse);
+                        }
+
+                        return news;
+                    });
+            }
+            catch (Exception ex)
+            {
+
+                return null;
+            }
         }
     }
 }
